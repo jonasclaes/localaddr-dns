@@ -16,10 +16,10 @@ import (
 )
 
 var base_domain string
-var ttl int
+var port, ttl int
 
 func main() {
-	port := flag.Int("port", 8090, "Port to run on")
+	flag.IntVar(&port, "port", 8090, "Port to run on")
 	flag.IntVar(&ttl, "ttl", 3600, "Time to live")
 	flag.StringVar(&base_domain, "base_domain", "localaddr.net", "Base domain")
 	flag.Parse()
@@ -29,7 +29,7 @@ func main() {
 	// UDP server
 	go func() {
 		srv := &dns.Server{
-			Addr: ":" + strconv.Itoa(*port),
+			Addr: ":" + strconv.Itoa(port),
 			Net:  "udp",
 		}
 		if err := srv.ListenAndServe(); err != nil {
@@ -40,7 +40,7 @@ func main() {
 	// TCP server
 	go func() {
 		srv := &dns.Server{
-			Addr: ":" + strconv.Itoa(*port),
+			Addr: ":" + strconv.Itoa(port),
 			Net:  "tcp",
 		}
 		if err := srv.ListenAndServe(); err != nil {
@@ -48,7 +48,7 @@ func main() {
 		}
 	}()
 
-	log.Println("localaddr-dns server started up.")
+	log.Printf("localaddr-dns server started up on port %d.\n", port)
 
 	sig := make(chan os.Signal)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
